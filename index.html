@@ -189,8 +189,8 @@
         const cls      = data.profit >= 0 ? 'positive' : 'negative';
         const sign     = data.profit >= 0 ? '+' : '';
         const refId    = formatRefId(data.refId);
-        // Contract value = 0.00 on loss
-        const cv = data.profit >= 0 ? data.contractValue.toFixed(2) : '0.00';
+        // Contract value = stake + profit
+        const cv = (data.stake + data.profit).toFixed(2);
         const row =
           `<tr>
              <td><i class="fas fa-chart-line"></i></td>
@@ -222,7 +222,8 @@
       const cls      = data.profit >= 0 ? 'positive' : 'negative';
       const sign     = data.profit >= 0 ? '+' : '';
       const refId    = formatRefId(data.refId);
-      const cv       = data.profit >= 0 ? data.contractValue.toFixed(2) : '0.00';
+      // Contract value = stake + profit
+      const cv       = (data.stake + data.profit).toFixed(2);
       const row =
         `<tr>
            <td><i class="fas fa-chart-line"></i></td>
