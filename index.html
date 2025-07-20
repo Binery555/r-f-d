@@ -1,21 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" >
-<head>
-  <meta charset="UTF-8">
-  <title>Untitled</title>
-  
-
-</head>
-<body>
-<!-- partial:index.partial.html -->
-<!-- binary-profit-table.html -->
-<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Binary Profit Table (Frontend)</title>
-
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
   <link rel="preconnect" href="https://rsms.me/">
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
@@ -160,7 +148,8 @@
       </div>
       <div class="summary">
         <span>Profit/loss on the last 150 contracts</span>
-        <span class="total-profit" id="total-profit"></span>
+        <!-- pre-filled with 3,659.96 -->
+        <span class="total-profit" id="total-profit">3,659.96</span>
       </div>
     </main>
   </div>
@@ -174,7 +163,8 @@
     // Load persisted data
     let trades = JSON.parse(localStorage.getItem(STORAGE_TRADES)) || [];
     let totalProfit = parseFloat(localStorage.getItem(STORAGE_PROFIT));
-    if (isNaN(totalProfit)) { totalProfit = 3629.99; }
+    // Default to 3,659.96 if no stored value
+    if (isNaN(totalProfit)) { totalProfit = 3659.96; }
 
     // Date/time formatters
     const fmtDate = d => d.toLocaleDateString('en-GB', {
@@ -199,17 +189,19 @@
         const cls      = data.profit >= 0 ? 'positive' : 'negative';
         const sign     = data.profit >= 0 ? '+' : '';
         const refId    = formatRefId(data.refId);
+        // Contract value = 0.00 on loss
+        const cv = data.profit >= 0 ? data.contractValue.toFixed(2) : '0.00';
         const row =
           `<tr>
-            <td><i class="fas fa-chart-line"></i></td>
-            <td>${refId}</td>
-            <td><span class="badge currency">USD</span></td>
-            <td>${fmtDate(buyDate)}<br><span class="time">${fmtTime(buyDate)} GMT</span></td>
-            <td>${data.stake.toFixed(2)}</td>
-            <td>${fmtDate(sellDate)}<br><span class="time">${fmtTime(sellDate)} GMT</span></td>
-            <td>${data.contractValue.toFixed(2)}</td>
-            <td class="${cls}">${sign}${data.profit.toFixed(2)}</td>
-          </tr>`;
+             <td><i class="fas fa-chart-line"></i></td>
+             <td>${refId}</td>
+             <td><span class="badge currency">USD</span></td>
+             <td>${fmtDate(buyDate)}<br><span class="time">${fmtTime(buyDate)} GMT</span></td>
+             <td>${data.stake.toFixed(2)}</td>
+             <td>${fmtDate(sellDate)}<br><span class="time">${fmtTime(sellDate)} GMT</span></td>
+             <td>${cv}</td>
+             <td class="${cls}">${sign}${data.profit.toFixed(2)}</td>
+           </tr>`;
         tbody.insertAdjacentHTML('afterbegin', row);
       });
     }
@@ -230,17 +222,18 @@
       const cls      = data.profit >= 0 ? 'positive' : 'negative';
       const sign     = data.profit >= 0 ? '+' : '';
       const refId    = formatRefId(data.refId);
+      const cv       = data.profit >= 0 ? data.contractValue.toFixed(2) : '0.00';
       const row =
         `<tr>
-          <td><i class="fas fa-chart-line"></i></td>
-          <td>${refId}</td>
-          <td><span class="badge currency">USD</span></td>
-          <td>${fmtDate(buyDate)}<br><span class="time">${fmtTime(buyDate)} GMT</span></td>
-          <td>${data.stake.toFixed(2)}</td>
-          <td>${fmtDate(sellDate)}<br><span class="time">${fmtTime(sellDate)} GMT</span></td>
-          <td>${data.contractValue.toFixed(2)}</td>
-          <td class="${cls}">${sign}${data.profit.toFixed(2)}</td>
-        </tr>`;
+           <td><i class="fas fa-chart-line"></i></td>
+           <td>${refId}</td>
+           <td><span class="badge currency">USD</span></td>
+           <td>${fmtDate(buyDate)}<br><span class="time">${fmtTime(buyDate)} GMT</span></td>
+           <td>${data.stake.toFixed(2)}</td>
+           <td>${fmtDate(sellDate)}<br><span class="time">${fmtTime(sellDate)} GMT</span></td>
+           <td>${cv}</td>
+           <td class="${cls}">${sign}${data.profit.toFixed(2)}</td>
+         </tr>`;
       tbody.insertAdjacentHTML('afterbegin', row);
 
       totalProfit += data.profit;
@@ -259,9 +252,5 @@
     const profitChannel = new BroadcastChannel('trade-profits');
     profitChannel.onmessage = ({ data }) => addTrade(data);
   </script>
-</body>
-</html>
-<!-- partial -->
-  
 </body>
 </html>
