@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
   <link rel="preconnect" href="https://rsms.me/">
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-
   <style>
     :root {
       --sidebar-bg:     #000000;
@@ -148,7 +147,6 @@
       </div>
       <div class="summary">
         <span>Profit/loss on the last 150 contracts</span>
-        <!-- pre-filled with 3,659.96 -->
         <span class="total-profit" id="total-profit">3,659.96</span>
       </div>
     </main>
@@ -160,13 +158,10 @@
     const STORAGE_TRADES = 'persistedTrades';
     const STORAGE_PROFIT = 'persistedTotalProfit';
 
-    // Load persisted data
     let trades = JSON.parse(localStorage.getItem(STORAGE_TRADES)) || [];
     let totalProfit = parseFloat(localStorage.getItem(STORAGE_PROFIT));
-    // Default to 3,659.96 if no stored value
-    if (isNaN(totalProfit)) { totalProfit = 3659.96; }
+    if (isNaN(totalProfit)) totalProfit = 3659.96;
 
-    // Date/time formatters
     const fmtDate = d => d.toLocaleDateString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric'
     });
@@ -174,39 +169,35 @@
       hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'
     });
 
-    // Ensure refId is 12-digit numeric starting with 138411
-    function formatRefId(raw) {
-      let digits = String(raw).replace(/\D/g, '');
-      let tail = digits.padStart(6, '0').slice(-6);
-      return '138411' + tail;
+    // Generate refId starting with 13855 and followed by 7 random digits
+    function formatRefId() {
+      const randDigits = Array.from({ length: 7 }, () => Math.floor(Math.random() * 10)).join('');
+      return '13855' + randDigits;
     }
 
-    // Render existing trades
     function renderSavedTrades() {
       trades.slice().reverse().forEach(data => {
-        const buyDate  = new Date(data.buyTime);
+        const buyDate = new Date(data.buyTime);
         const sellDate = new Date(data.sellTime);
-        const cls      = data.profit >= 0 ? 'positive' : 'negative';
-        const sign     = data.profit >= 0 ? '+' : '';
-        const refId    = formatRefId(data.refId);
-        // Contract value = stake + profit
+        const cls = data.profit >= 0 ? 'positive' : 'negative';
+        const sign = data.profit >= 0 ? '+' : '';
+        const refId = formatRefId();
         const cv = (data.stake + data.profit).toFixed(2);
-        const row =
-          `<tr>
-             <td><i class="fas fa-chart-line"></i></td>
-             <td>${refId}</td>
-             <td><span class="badge currency">USD</span></td>
-             <td>${fmtDate(buyDate)}<br><span class="time">${fmtTime(buyDate)} GMT</span></td>
-             <td>${data.stake.toFixed(2)}</td>
-             <td>${fmtDate(sellDate)}<br><span class="time">${fmtTime(sellDate)} GMT</span></td>
-             <td>${cv}</td>
-             <td class="${cls}">${sign}${data.profit.toFixed(2)}</td>
-           </tr>`;
+        const row = `
+          <tr>
+            <td><i class="fas fa-chart-line"></i></td>
+            <td>${refId}</td>
+            <td><span class="badge currency">USD</span></td>
+            <td>${fmtDate(buyDate)}<br><span class="time">${fmtTime(buyDate)} GMT</span></td>
+            <td>${data.stake.toFixed(2)}</td>
+            <td>${fmtDate(sellDate)}<br><span class="time">${fmtTime(sellDate)} GMT</span></td>
+            <td>${cv}</td>
+            <td class="${cls}">${sign}${data.profit.toFixed(2)}</td>
+          </tr>`;
         tbody.insertAdjacentHTML('afterbegin', row);
       });
     }
 
-    // Update summary display
     function updateTotalProfitDisplay() {
       totalProfitEl.textContent = (totalProfit >= 0 ? '+' : '') +
         totalProfit.toLocaleString('en-GB', {
@@ -215,26 +206,24 @@
         });
     }
 
-    // Add a new trade row and update storage
     function addTrade(data) {
-      const buyDate  = new Date(data.buyTime);
+      const buyDate = new Date(data.buyTime);
       const sellDate = new Date(data.sellTime);
-      const cls      = data.profit >= 0 ? 'positive' : 'negative';
-      const sign     = data.profit >= 0 ? '+' : '';
-      const refId    = formatRefId(data.refId);
-      // Contract value = stake + profit
-      const cv       = (data.stake + data.profit).toFixed(2);
-      const row =
-        `<tr>
-           <td><i class="fas fa-chart-line"></i></td>
-           <td>${refId}</td>
-           <td><span class="badge currency">USD</span></td>
-           <td>${fmtDate(buyDate)}<br><span class="time">${fmtTime(buyDate)} GMT</span></td>
-           <td>${data.stake.toFixed(2)}</td>
-           <td>${fmtDate(sellDate)}<br><span class="time">${fmtTime(sellDate)} GMT</span></td>
-           <td>${cv}</td>
-           <td class="${cls}">${sign}${data.profit.toFixed(2)}</td>
-         </tr>`;
+      const cls = data.profit >= 0 ? 'positive' : 'negative';
+      const sign = data.profit >= 0 ? '+' : '';
+      const refId = formatRefId();
+      const cv = (data.stake + data.profit).toFixed(2);
+      const row = `
+        <tr>
+          <td><i class="fas fa-chart-line"></i></td>
+          <td>${refId}</td>
+          <td><span class="badge currency">USD</span></td>
+          <td>${fmtDate(buyDate)}<br><span class="time">${fmtTime(buyDate)} GMT</span></td>
+          <td>${data.stake.toFixed(2)}</td>
+          <td>${fmtDate(sellDate)}<br><span class="time">${fmtTime(sellDate)} GMT</span></td>
+          <td>${cv}</td>
+          <td class="${cls}">${sign}${data.profit.toFixed(2)}</td>
+        </tr>`;
       tbody.insertAdjacentHTML('afterbegin', row);
 
       totalProfit += data.profit;
@@ -245,11 +234,9 @@
       localStorage.setItem(STORAGE_TRADES, JSON.stringify(trades));
     }
 
-    // Initial render
     renderSavedTrades();
     updateTotalProfitDisplay();
 
-    // Listen for new trades via BroadcastChannel
     const profitChannel = new BroadcastChannel('trade-profits');
     profitChannel.onmessage = ({ data }) => addTrade(data);
   </script>
